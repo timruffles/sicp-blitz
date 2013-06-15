@@ -8,20 +8,24 @@
 ; that we then call with args
 (defn has-value? [connector]
   (connector 'has-value?))
-(defn get-value [connector] 
+(defn get-value [connector]
   (connector 'get-value))
 (defn set-value! [connector new-value informant]
-  ((connector 'set-value!) new-value informant)) 
+  ((connector 'set-value!) new-value informant))
 (defn forget-value [connector retractor]
-  ((connector 'forget-value) new-constraint))
-(defn connect [connector new-constraint] 
+  ((connector 'forget-value) retractor))
+(defn connect [connector new-constraint]
   ((connector 'connect) new-constraint))
 
+(defn error [msg]
+  ; ugh, java interop to throw an error?!
+  (throw (Exception. msg)))
 
 (defn constant [value connector]
   (let [
     me (fn [request]
       (error "Whoops - I'm a constant, you can't do anything to me"))
+  ]
   (connect connector me)
   (set-value! connector value me)
   me))
@@ -36,22 +40,28 @@
   (let [
     value (atom nil)
     informant (atom nil)
-    connections (atom '())
+    connections (atom #{})
   ]
     (letfn [
-      me (fn [request]
+      (me [request]
         (case request
-          'has-value? (not (nil? (deref value)))
-          'get-value (deref value)
-          'set-value! set-value!
-          'connect connect
-          'forget-value forget-value))
-      set-value! (fn [new-value informant]
-        (if (not (has-value? me))
-          (compare-and-set! value nil new-value)
-          (apply value-for-you
-          )
+          has-value? (not (nil? (deref value)))
+          get-value (deref value)
+          set-value! set-value!
+          connect connect
+          forget-value forget-value))
+      (set-value! [new-value informant]
+        (if (has-value? me)
+          (do
+            (if (not= new-value) (error (format "Contradiction: have value %s and was told to set value %s" value new-value))))
+          (do
+            (compare-and-set! value nil new-value)
+            (for-each-except informant inform-about-value (deref connections)))
         )
       )
+      (connect [new-connector]
+        (swap! connections clojure.set/union new-connector))
+      (forget-value []
+        (swap! value (fn [x] nil) nil))
     ]
-    me))
+    me)))

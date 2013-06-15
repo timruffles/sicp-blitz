@@ -2,5 +2,13 @@
   (:use [sicpblitz.week-three])
   (:use [clojure.test]))
 
-(deftest make-constraints
-  (let [C (make)]))
+(deftest basic-connector
+  (let [
+      a (make-connector)
+      b (make-connector)
+    ]
+    (do
+      (set-value! a 5 b)
+      (is 5 (get-value a))
+      )
+    ))
