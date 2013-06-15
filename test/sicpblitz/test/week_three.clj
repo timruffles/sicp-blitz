@@ -3,4 +3,4 @@
   (:use [clojure.test]))
 
 (deftest hang-of-it
-  (is true (sicpblitz.week-three/truer)))
+  (is 2 (sicpblitz.week-three/add 1)))

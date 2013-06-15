@@ -1,3 +1,3 @@
 (ns sicpblitz.week-three)
 
-(defn truer [] true)
+(defn add [x] (+ x 1))
