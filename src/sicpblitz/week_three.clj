@@ -1,4 +1,5 @@
-(ns sicpblitz.week-three)
+(ns sicpblitz.week-three
+  (:use [clojure.set]))
 
 ; primitives are connectors - things that have a value, and some connections to other connections. when they have a value they tell their connections about it
 
@@ -32,6 +33,8 @@
 
 (defn inform-about-value [connector]
   (connector 'I-have-a-value))
+(defn inform-about-no-value [connector]
+  (connector 'I-lost-my-value))
 
 (defn for-each-except [except f all]
   (doseq [a (filter (fn [x] (not= except x)) all)] (f a))) 
@@ -60,8 +63,28 @@
         )
       )
       (connect [new-connector]
-        (swap! connections clojure.set/union new-connector))
+        (swap! connections clojure.set/union #{new-connector}))
       (forget-value []
         (swap! value (fn [x] nil) nil))
     ]
     me)))
+
+(defn adder [a b c]
+  (letfn [
+    (add [& connectors]
+      (apply + (map get-value connectors)))
+    (update []
+      (cond (and (has-value? a) (has-value? b)) (set-value! c (add a b) me)
+            (and (has-value? a) (has-value? c)) (set-value! b (add a c) me)
+            (and (has-value? b) (has-value? c)) (set-value! a (add b c) me)))
+    (forget []
+      )
+    (me [message]
+      (case message
+        I-have-a-value (update)
+        I-lost-my-value (forget)))
+  ]
+  (connect a me)
+  (connect b me)
+  (connect c me)
+  me))
