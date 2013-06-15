@@ -2,5 +2,5 @@
   (:use [sicpblitz.week-three])
   (:use [clojure.test]))
 
-(deftest hang-of-it
-  (is 2 (sicpblitz.week-three/add 1)))
+(deftest make-constraints
+  (let [C (make)]))
