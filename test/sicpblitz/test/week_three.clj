@@ -25,5 +25,7 @@
       (set-value! a 5 f)
       (set-value! b 10 f)
       (is (= 15 (get-value c)))
+      (forget-value b f)
+      (is (= nil (get-value c)))
       )
     ))

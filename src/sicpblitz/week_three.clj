@@ -64,8 +64,9 @@
       )
       (connect [new-connector]
         (swap! connections clojure.set/union #{new-connector}))
-      (forget-value []
-        (swap! value (fn [x] nil) nil))
+      (forget-value [retractor]
+        (compare-and-set! value @value nil)
+        (for-each-except retractor inform-about-no-value (deref connections)))
     ]
     me)))
 
@@ -78,7 +79,7 @@
             (and (has-value? a) (has-value? c)) (set-value! b (add a c) me)
             (and (has-value? b) (has-value? c)) (set-value! a (add b c) me)))
     (forget []
-      )
+      (doseq [x [a b c]] (forget-value x me)))
     (me [message]
       (case message
         I-have-a-value (update)
