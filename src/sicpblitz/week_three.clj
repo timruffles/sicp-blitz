@@ -22,15 +22,6 @@
   ; ugh, java interop to throw an error?!
   (throw (Exception. msg)))
 
-(defn constant [value connector]
-  (let [
-    me (fn [request]
-      (error "Whoops - I'm a constant, you can't do anything to me"))
-  ]
-  (connect connector me)
-  (set-value! connector value me)
-  me))
-
 (defn inform-about-value [connector]
   (connector 'I-have-a-value))
 (defn inform-about-no-value [connector]
@@ -53,20 +44,24 @@
           set-value! set-value!
           connect connect
           forget-value forget-value))
-      (set-value! [new-value informant]
+      (set-value! [new-value from]
         (if (has-value? me)
           (do
             (if (not= new-value) (error (format "Contradiction: have value %s and was told to set value %s" value new-value))))
           (do
             (compare-and-set! value nil new-value)
-            (for-each-except informant inform-about-value (deref connections)))
+            (compare-and-set! informant nil from)
+            (for-each-except from inform-about-value (deref connections)))
         )
       )
       (connect [new-connector]
         (swap! connections clojure.set/union #{new-connector}))
       (forget-value [retractor]
-        (compare-and-set! value @value nil)
-        (for-each-except retractor inform-about-no-value (deref connections)))
+        (if (= retractor (deref informant))
+          (do
+            (compare-and-set! value @value nil)
+            (compare-and-set! informant retractor nil)
+            (for-each-except retractor inform-about-no-value (deref connections)))))
     ]
     me)))
 
@@ -88,4 +83,33 @@
   (connect a me)
   (connect b me)
   (connect c me)
+  me))
+
+(defn multiplier [a b c]
+  (letfn [
+    (run [f & connectors]
+      (apply f (map get-value connectors)))
+    (update []
+      (cond (and (has-value? a) (has-value? b)) (set-value! c (run * a b) me)
+            (and (has-value? a) (has-value? c)) (set-value! b (run / c a) me)
+            (and (has-value? b) (has-value? c)) (set-value! a (run / c b) me)))
+    (forget []
+      (doseq [x [a b c]] (forget-value x me)))
+    (me [message]
+      (case message
+        I-have-a-value (update)
+        I-lost-my-value (forget)))
+  ]
+  (connect a me)
+  (connect b me)
+  (connect c me)
+  me))
+
+(defn constant [a value]
+  (letfn [
+    (me [message]
+      (error "I am a constant - can't do anything to me"))
+  ]
+  (connect a me)
+  (set-value! a value me)
   me))
