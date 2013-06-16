@@ -72,12 +72,12 @@
 
 (defn adder [a b c]
   (letfn [
-    (add [& connectors]
-      (apply + (map get-value connectors)))
+    (run [f & connectors]
+      (apply f (map get-value connectors)))
     (update []
-      (cond (and (has-value? a) (has-value? b)) (set-value! c (add a b) me)
-            (and (has-value? a) (has-value? c)) (set-value! b (add a c) me)
-            (and (has-value? b) (has-value? c)) (set-value! a (add b c) me)))
+      (cond (and (has-value? a) (has-value? b)) (set-value! c (run + a b) me)
+            (and (has-value? a) (has-value? c)) (set-value! b (run - c a) me)
+            (and (has-value? b) (has-value? c)) (set-value! a (run - c b) me)))
     (forget []
       (doseq [x [a b c]] (forget-value x me)))
     (me [message]
