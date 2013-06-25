@@ -39,5 +39,5 @@
 (defn isvariable? [x]
   (and (symbol? x) 
        (= \? (first (name x)))
-       (count (name x))
+       (> 1 (count (name x)))
     ))
