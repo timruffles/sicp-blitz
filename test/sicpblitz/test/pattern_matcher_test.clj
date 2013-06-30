@@ -24,3 +24,33 @@
     (is (= (extend-if-consistent '?person 'tim frame-with-bob) :failed))
     ))
 
+#_(deftest extend-if-possible
+  (let [
+      frame {}
+    ]
+    (is (= :failed (extend-if-possible '?x '(?x ?x) frame)))
+    ))
+
+(deftest depends-on-test
+  (let [
+    cases [
+      '[[?x ?x {}] true]
+      '[[?x [?x ?y] {}] true]
+      '[[?x [?y ?z] {}] false]
+      '[[?x ?y {?y [?x ?z]}] true]
+      '[[?x ?y {?y [?u ?z]}] false]
+      '[[?x 5 {}] false]
+      '[[?x [5 5 5] {}] false]
+    ]
+  ]
+  (doseq [
+    setup cases
+  ]
+    (let [
+        [[to from frame] expected] setup
+      ]
+        (is (= expected (depends-on? from to frame)))
+      )
+
+    )
+  ))
