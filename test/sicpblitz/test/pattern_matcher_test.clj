@@ -13,7 +13,7 @@
       (is (= :failed (match pattern not-match {})))
       )))
 
-#_(deftest extend-if-consistent-test
+(deftest extend-if-consistent-test
   (let [
       empty-frame {}
       frame-with-tim {'?person 'tim}
