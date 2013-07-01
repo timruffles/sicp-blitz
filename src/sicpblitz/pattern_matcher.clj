@@ -33,7 +33,7 @@
       (extend-frame variable data frame))))
 
 (defn binding-in-frame [variable frame]
-  (variable frame))
+  (get frame variable))
 
 (defn is-bound? [variable frame]
   (not= nil (binding-in-frame variable frame)))
@@ -68,8 +68,8 @@
 
 (defn extend-if-possible [variable data frame]
   (let [
-      variable-value (binding-in-frame variable)
-      data-value (binding-in-frame data)
+      variable-value (binding-in-frame variable frame)
+      data-value (binding-in-frame data frame)
     ]
 
   (cond (is-bound? variable frame) 

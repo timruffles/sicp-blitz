@@ -24,12 +24,21 @@
     (is (= (extend-if-consistent '?person 'tim frame-with-bob) :failed))
     ))
 
-#_(deftest extend-if-possible
+(deftest extend-if-possible-test
   (let [
       frame {}
     ]
     (is (= :failed (extend-if-possible '?x '(?x ?x) frame)))
+    (is (not= :failed (extend-if-possible '?x '(?z ?y) frame)))
     ))
+
+(deftest unify-match-test
+  (let [
+      query '(is-hacker? ?x ?job)
+      rule '(is-hacker? ?person ?role)
+    ]
+    (is (= (unify-match query rule {}) '{?x ?person ?job ?role}))
+      ))
 
 (deftest depends-on-test
   (let [
