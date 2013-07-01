@@ -38,6 +38,7 @@
       rule '(is-hacker? ?person ?role)
     ]
     (is (= (unify-match query rule {}) '{?x ?person ?job ?role}))
+    (is (= (unify-match query rule '{?x foo}) :failed))
       ))
 
 (deftest depends-on-test
