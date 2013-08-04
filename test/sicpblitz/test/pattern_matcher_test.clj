@@ -11,6 +11,7 @@
     (do
       (is (not= :failed (match pattern matches {})))
       (is (= :failed (match pattern not-match {})))
+      (is (= :failed (match pattern matches '{?x bob})))
       )))
 
 (deftest extend-if-consistent-test
@@ -32,6 +33,12 @@
     (is (not= :failed (extend-if-possible '?x '(?z ?y) frame)))
     ))
 
+; (rule (is-hacker? ?individual ?role)
+;       (...)))
+;
+; (and (address ?person (london . ?rest))
+;      (job ?person ?job)
+;      (is-hacker? ?person ?job))
 (deftest unify-match-test
   (let [
       query '(is-hacker? ?x ?job)

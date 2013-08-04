@@ -56,7 +56,9 @@
 (defn unify-match [p1 p2 frame]
   (cond (= frame :failed) :failed
         (= p1 p2) frame
+        ; ?x <something>
         (isvariable? p1) (extend-if-possible p1 p2 frame)
+        ; 
         (isvariable? p2) (extend-if-possible p2 p1 frame) ; extension from pattern-match, handling RHS being a variable
         (and (compound? p1) (compound? p2))
            (match (rest p1)
@@ -93,6 +95,7 @@
 ; (depends-on? (?x ?x) ?x) - true
 ; (depends-on? (?x ?y) ?x) - true
 ; (depends-on? (?y ?z) ?x) - false
+; (depends-on? (?y ?z) ?x) {?y ?x} - true
 (defn depends-on? [from to frame]
   (letfn [
     (walk [exp]
